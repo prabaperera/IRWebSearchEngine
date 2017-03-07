@@ -48,30 +48,15 @@ public class SearchEngineServlet extends HttpServlet{
 				 List<SearchResult> resultDocs = TestLucene.search(searchQuery, 10);
 				
 				response.getWriter().println((new Gson()).toJson(resultDocs));
-//				
-//				PrintWriter out = response.getWriter();
-//				out.println("<html>");
-//				out.println("<body>");
-//				out.println("<h1>Search Results</h1>");
-//				out.println("<table>");
-//				for(SearchResult searchResult : resultDocs)
-//				{
-//					if(searchResult == null)
-//					{
-//						continue;
-//					}
-//					out.println("<tr>");
-//					out.println("<td>");
-//					out.println(searchResult.getTitle());
-//					out.println("</td>");
-//					out.println("</tr>");
-//				}
-//				out.println("</table>");
-//				out.println("</body>");
-//				out.println("</html>");
+
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
+		}
+		else if("document".equals(requestType))
+		{
+			String documentId = request.getParameter("documentId");
+			
 		}
 		else
 		{
