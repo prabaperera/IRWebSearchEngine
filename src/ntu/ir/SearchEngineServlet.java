@@ -1,7 +1,6 @@
 package ntu.ir;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -36,36 +35,36 @@ public class SearchEngineServlet extends HttpServlet{
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
 		
 		String requestType = request.getParameter("requestType");
-		
-		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		
 		if("search".equals(requestType))
 		{
 			String searchQuery =  request.getParameter("searchQuery");
-			 
-			 try {
-				 List<SearchResult> resultDocs = TestLucene.search(searchQuery, 10);
+			String resultsPerPage = request.getParameter("resultsPerPage");
+			int resPerPage = Integer.parseInt(resultsPerPage);
+			response.setContentType("application/json");
+			 try 
+			 {
+				 List<SearchResult> resultDocs = TestLucene.search(searchQuery, resPerPage);
 				
 				response.getWriter().println((new Gson()).toJson(resultDocs));
-
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
+	
+			 }catch (ParseException e) {
+				throw new ServletException(e);
+			 }
 		}
 		else if("document".equals(requestType))
 		{
+			response.setContentType("text/html");
 			String documentId = request.getParameter("documentId");
-			
-		}
-		else
-		{
-			PrintWriter out = response.getWriter();
-			out.println("<html>");
-			out.println("<body>");
-			out.println("<h1>Hello Servlet Get</h1>");
-			out.println("</body>");
-			out.println("</html>");
+			try {
+				List<String[]> documents =  TestLucene.findDocument(documentId);
+				System.out.println(documents);
+				String docAsHtml = HtmlResponseBuilder.buildSingleDocumentPage(documents);
+				response.getWriter().println(docAsHtml);
+			} catch (Exception e) {
+				throw new ServletException(e);
+			}
 		}
 	}
 }

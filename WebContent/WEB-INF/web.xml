@@ -12,7 +12,7 @@
 
 	<servlet-mapping>
 		<servlet-name>SearchEngineServlet</servlet-name>
-		<url-pattern>/ir</url-pattern>
+		<url-pattern>/**/ir/**</url-pattern>
 	</servlet-mapping>
 	
 </web-app>

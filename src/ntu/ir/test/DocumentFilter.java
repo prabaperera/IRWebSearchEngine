@@ -15,7 +15,6 @@ import org.xml.sax.SAXException;
 
 public class DocumentFilter 
 {
-	private static final String DOC_LOCATION = "/Users/praba/Documents/NTU/IR/project/keka/xaa.xml";
 	
 	private static final TreeMap<String, Integer> qIdMap = new TreeMap<String, Integer>();
 	
@@ -25,9 +24,9 @@ public class DocumentFilter
 		
 		//Get Java related records from the large data set.
 		
-		Path newFile = Paths.get("./resource/documents/javaQandA.xml");
+		Path newFile = Paths.get(ConfigLoader.getConfig(ConfigLoader.DOC_LOCATION) , "javaQandA.xml");
 		
-		try(Scanner sc = new Scanner(Paths.get(DOC_LOCATION)))
+		try(Scanner sc = new Scanner(Paths.get(ConfigLoader.getConfig(ConfigLoader.ORIGINAL_DOC_LOCATION))))
 		{
 			while(sc.hasNextLine())
 			{
@@ -37,7 +36,16 @@ public class DocumentFilter
 				{
 					continue;
 				}
-				DoumentUtil.RowData rowData = DoumentUtil.extractRowData(line);
+				DoumentUtil.RowData rowData = null;
+				try
+				{
+					rowData = DoumentUtil.extractRowData(line);
+				}
+				catch(XPathExpressionException| ParserConfigurationException| SAXException e1)
+				{
+					System.out.println( e1);
+					continue;
+				}
 				
 				if(!rowData.isAnAnswer())
 				{
@@ -60,7 +68,7 @@ public class DocumentFilter
 		
 		//Write Data to File
 		
-		try(Scanner sc = new Scanner(Paths.get(DOC_LOCATION)))
+		try(Scanner sc = new Scanner(Paths.get(ConfigLoader.getConfig(ConfigLoader.ORIGINAL_DOC_LOCATION))))
 		{
 			while(sc.hasNextLine())
 			{
@@ -70,8 +78,16 @@ public class DocumentFilter
 				{
 					continue;
 				}
-				
-				String rowId = DoumentUtil.extractRowId(line);
+				String rowId = null;
+				try
+				{
+					rowId = DoumentUtil.extractRowId(line);
+				}
+				catch(XPathExpressionException| ParserConfigurationException| SAXException e1)
+				{
+					System.out.println( e1);
+					continue;
+				}
 				if(IdMap.containsKey(rowId))
 				{
 					line += "\n";

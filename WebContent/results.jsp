@@ -23,6 +23,7 @@ $('#searchButton').click(function () {
 		url : 'SearchEngineServlet',
 		data : {
 			requestType : 'search',
+			resultsPerPage : $('#resultsPerPage').val(),
 			searchQuery : $('#searchQuery').val()
 		},
 		success : function(json) 
@@ -55,6 +56,9 @@ $('#searchButton').click(function () {
 	<table>
 		<tr>
 			<td><input type="text" id="searchQuery"></td><td><button type="button" id="searchButton">Search</button></td>
+		</tr>
+		<tr>
+			<td><input type="text" id="resultsPerPage" value="10" ></td><td></td>
 		</tr>
 	</table>
 </div>
