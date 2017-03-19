@@ -18,7 +18,7 @@ public class DocumentFilter
 	
 	private static final TreeMap<String, Integer> qIdMap = new TreeMap<String, Integer>();
 	
-	private static TreeMap<String, Integer> IdMap = new TreeMap<String, Integer>();
+	//private static TreeMap<String, Integer> IdMap = new TreeMap<String, Integer>();
 	
 	public static void main(String[] args) throws IOException, XPathExpressionException, ParserConfigurationException, SAXException {
 		
@@ -28,6 +28,7 @@ public class DocumentFilter
 		
 		try(Scanner sc = new Scanner(Paths.get(ConfigLoader.getConfig(ConfigLoader.ORIGINAL_DOC_LOCATION))))
 		{
+			int records = 0;
 			while(sc.hasNextLine())
 			{
 				String line =  sc.nextLine();
@@ -49,11 +50,12 @@ public class DocumentFilter
 				
 				if(!rowData.isAnAnswer())
 				{
-					if(rowData.isJavaRelated())
+					if(!rowData.isJavaRelated())
 					{
-						qIdMap.put(rowData.id, 0);
-						IdMap.put(rowData.id , 1);
+						continue;
 					}
+					qIdMap.put(rowData.id, 0);
+					//IdMap.put(rowData.id , 1);
 				}
 				else
 				{
@@ -61,40 +63,46 @@ public class DocumentFilter
 					{
 						continue;
 					}
-					IdMap.put(rowData.id , 1);
+					//IdMap.put(rowData.id , 1);
 				}
+				line += "\n";
+				Files.write(newFile, line.getBytes(), StandardOpenOption.APPEND);
+				System.out.println(records++);
 			}
 		}
 		
-		//Write Data to File
-		
-		try(Scanner sc = new Scanner(Paths.get(ConfigLoader.getConfig(ConfigLoader.ORIGINAL_DOC_LOCATION))))
-		{
-			while(sc.hasNextLine())
-			{
-				String line =  sc.nextLine();
-				line = line.trim();
-				if(!line.startsWith("<row"))
-				{
-					continue;
-				}
-				String rowId = null;
-				try
-				{
-					rowId = DoumentUtil.extractRowId(line);
-				}
-				catch(XPathExpressionException| ParserConfigurationException| SAXException e1)
-				{
-					System.out.println( e1);
-					continue;
-				}
-				if(IdMap.containsKey(rowId))
-				{
-					line += "\n";
-					Files.write(newFile, line.getBytes(), StandardOpenOption.APPEND);
-				}
-			}
-		}
+//		//Write Data to File
+//		int records = 0;
+//		try(Scanner sc = new Scanner(Paths.get(ConfigLoader.getConfig(ConfigLoader.ORIGINAL_DOC_LOCATION))))
+//		{
+//			while(sc.hasNextLine())
+//			{
+//				String line =  sc.nextLine();
+//				line = line.trim();
+//				if(!line.startsWith("<row"))
+//				{
+//					continue;
+//				}
+//				String rowId = null;
+//				try
+//				{
+//					rowId = DoumentUtil.extractRowId(line);
+//				}
+//				catch(XPathExpressionException| ParserConfigurationException| SAXException e1)
+//				{
+//					System.out.println( e1);
+//					continue;
+//				}
+//				if(IdMap.containsKey(rowId))
+//				{
+//					line += "\n";
+//					Files.write(newFile, line.getBytes(), StandardOpenOption.APPEND);
+//					records++;
+//				}
+//				
+//				System.out.println(records++);
+//			}
+//		}
 		
 	}
 }

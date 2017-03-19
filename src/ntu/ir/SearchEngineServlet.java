@@ -41,11 +41,13 @@ public class SearchEngineServlet extends HttpServlet{
 		{
 			String searchQuery =  request.getParameter("searchQuery");
 			String resultsPerPage = request.getParameter("resultsPerPage");
+			String searchIn = request.getParameter("searchIn");
+			
 			int resPerPage = Integer.parseInt(resultsPerPage);
 			response.setContentType("application/json");
 			 try 
 			 {
-				 List<SearchResult> resultDocs = TestLucene.search(searchQuery, resPerPage);
+				 List<SearchResult> resultDocs = TestLucene.excecuteQuery(searchQuery, resPerPage, searchIn);
 				
 				response.getWriter().println((new Gson()).toJson(resultDocs));
 	
@@ -58,11 +60,25 @@ public class SearchEngineServlet extends HttpServlet{
 			response.setContentType("text/html");
 			String documentId = request.getParameter("documentId");
 			try {
-				List<String[]> documents =  TestLucene.findDocument(documentId);
+				List<String[]> documents =  TestLucene.findDocumentById(documentId);
 				System.out.println(documents);
 				String docAsHtml = HtmlResponseBuilder.buildSingleDocumentPage(documents);
 				response.getWriter().println(docAsHtml);
 			} catch (Exception e) {
+				throw new ServletException(e);
+			}
+		}
+		else if("buildIndex".equals(requestType))
+		{
+			response.setContentType("application/json");
+			try 
+			{
+				TestLucene.buildIndex();
+				TestLucene.buildDocumentIndex();
+				response.getWriter().println((new Gson()).toJson("success"));
+			} 
+			catch (Exception e) 
+			{
 				throw new ServletException(e);
 			}
 		}

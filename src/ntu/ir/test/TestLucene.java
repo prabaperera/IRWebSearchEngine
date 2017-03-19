@@ -41,11 +41,6 @@ import org.xml.sax.SAXException;
 public class TestLucene 
 {
 	
-	public static void main(String[] args) throws XPathExpressionException, IOException, ParserConfigurationException, SAXException {
-		TestLucene.buildIndex();
-		TestLucene.buildDocumentIndex();
-	}
-	
 	public static void buildIndex() throws IOException, XPathExpressionException, ParserConfigurationException, SAXException
 	{
 		//Build relation Map
@@ -60,6 +55,7 @@ public class TestLucene
 		IndexWriterConfig config = new IndexWriterConfig(analyzer);
 		
 		System.out.println("Start building Indexes");
+		DocumentIndexer docIndexer = DocumentIndexerFactory.getDocumentIndexer(DocumentIndexerFactory.COMPOUND_INDEX);
 		//try(IndexWriter w = new IndexWriter(index, config); Stream<Path> files = Files.list(Paths.get("./resource/documents"));)
 		try(IndexWriter w = new IndexWriter(index, config);)
 		{
@@ -71,8 +67,7 @@ public class TestLucene
 				LinkedList<RelationDetail> rdList = rowRelationMap.get(key);
 				
 				List<RowDetail> rowDetails = extractRowDetail(rdList);
-				
-				addCompoundDocToIndex(w, rowDetails);
+				docIndexer.addCompoundDocToIndex(w, rowDetails);
 			}
 		}
 		
@@ -126,7 +121,7 @@ public class TestLucene
 		System.out.println("Index generation completed.");
 	}
 	
-	public static List<String[]> findDocument(String documentId) throws IOException, ParseException, XPathExpressionException, ParserConfigurationException, SAXException
+	public static List<String[]> findDocumentById(String documentId) throws IOException, ParseException, XPathExpressionException, ParserConfigurationException, SAXException
 	{
 		JavaCodeAnalyzer analyzer = new JavaCodeAnalyzer();
 		FSDirectory index = FSDirectory.open(Paths.get(ConfigLoader.getConfig(ConfigLoader.INDEX_LOCATION_OF_INDIVIDUAL_DOCUMENT)));
@@ -170,8 +165,9 @@ public class TestLucene
 		return resultDocs;
 	}
 	
-	public static List<SearchResult> search(String searchQuery , int hitsPerPage) throws IOException, ParseException
+	public static List<SearchResult> excecuteQuery(String searchQuery , int hitsPerPage , String searchIn) throws IOException, ParseException
 	{
+		String [] searchInArray = searchIn.split(",");
 		JavaCodeAnalyzer analyzer = new JavaCodeAnalyzer();
 		FSDirectory index = FSDirectory.open(Paths.get(ConfigLoader.getConfig(ConfigLoader.INDEX_LOCATION_OF_MERGED_DOCUMENT)));
 		
@@ -182,7 +178,7 @@ public class TestLucene
         // when no field is explicitly specified in the query.
         
         MultiFieldQueryParser  queryParser = new MultiFieldQueryParser(
-                new String[] {"body", "title"},
+        		searchInArray,
                 analyzer);
         Query q = queryParser.parse(querystr);
         
@@ -200,12 +196,13 @@ public class TestLucene
 	        // 4. display results
 	        System.out.println("Found " + hits.length + " hits.");
 	        for(int i=0;i<hits.length;++i) {
-	            int docId = hits[i].doc;
+	        	ScoreDoc doc = hits[i];
+	            int docId = doc.doc;
 	            Document d = searcher.doc(docId);
 	            String title = d.get("title");
 	            String documentId = d.get("root");
 	            String titleUrl = HtmlResponseBuilder.getDoumentAccessURL(documentId , title);
-	            resultDocIds.add(new SearchResult(documentId, titleUrl));
+	            resultDocIds.add(new SearchResult(documentId, titleUrl , i, doc.score));
 	            System.out.println((i + 1) + ". " + documentId +" "+title);
 	        }
 	        System.out.println("-----------------------------------------\n");
@@ -215,6 +212,54 @@ public class TestLucene
 		
 		return resultDocIds;
 	}
+	
+//	public static List<SearchResult> excecuteQuery(String searchQuery , int hitsPerPage , String searchIn) throws IOException, ParseException
+//	{
+//		String [] searchInArray = searchIn.split(",");
+//		JavaCodeAnalyzer analyzer = new JavaCodeAnalyzer();
+//		FSDirectory index = FSDirectory.open(Paths.get(ConfigLoader.getConfig(ConfigLoader.INDEX_LOCATION_OF_MERGED_DOCUMENT)));
+//		
+//		// 2. query
+//        String querystr = searchQuery;
+//
+//        // the "title" arg specifies the default field to use
+//        // when no field is explicitly specified in the query.
+//        
+//        MultiFieldQueryParser  queryParser = new MultiFieldQueryParser(
+//        		searchInArray,
+//                analyzer);
+//        Query q = queryParser.parse(querystr);
+//        
+//        // 3. search
+//        
+//        List<SearchResult> resultDocIds = new ArrayList<SearchResult>(hitsPerPage);
+//        
+//        try(IndexReader reader = DirectoryReader.open(index);)
+//        {
+//	        IndexSearcher searcher = new IndexSearcher(reader);
+//	        
+//	        TopDocs docs = searcher.search(q, hitsPerPage);
+//	        ScoreDoc[] hits = docs.scoreDocs;
+//	
+//	        // 4. display results
+//	        System.out.println("Found " + hits.length + " hits.");
+//	        for(int i=0;i<hits.length;++i) {
+//	        	ScoreDoc doc = hits[i];
+//	            int docId = doc.doc;
+//	            Document d = searcher.doc(docId);
+//	            String title = d.get("title");
+//	            String documentId = d.get("root");
+//	            String titleUrl = HtmlResponseBuilder.getDoumentAccessURL(documentId , title);
+//	            resultDocIds.add(new SearchResult(documentId, titleUrl , i, doc.score));
+//	            System.out.println((i + 1) + ". " + documentId +" "+title);
+//	        }
+//	        System.out.println("-----------------------------------------\n");
+//	        // reader can only be closed when there
+//	        // is no need to access the documents any more.
+//        }
+//		
+//		return resultDocIds;
+//	}
 	
 
 	private static List<RowDetail> extractRowDetail(LinkedList<RelationDetail> rdList) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException 
@@ -293,21 +338,6 @@ public class TestLucene
 		return rowRelationMap;
 	}
 
-	
-	private static void addCompoundDocToIndex(IndexWriter w, List<RowDetail> rowDetails) throws IOException, ParserConfigurationException, SAXException {
-		Document doc = new Document();
-		  
-		RowDetail rd = rowDetails.get(0);
-		
-		for(RowDetail rowd : rowDetails)
-		{
-			doc.add( new TextField("title", rowd.title, Field.Store.YES));
-			doc.add( new TextField("body", rowd.body, Field.Store.YES));
-		}
-		doc.add(new StoredField("root", rd.id));
-		w.addDocument(doc);
-	}
-	
 	private static void addIndividualDocToIndex(IndexWriter w, String document, String id, String parentId) throws IOException, ParserConfigurationException, SAXException {
 		Document doc = new Document();
 		  
@@ -333,7 +363,7 @@ public class TestLucene
 		}
 	}
 	
-	private static class RowDetail
+	public static class RowDetail
 	{
 		String title;
 		String body;
