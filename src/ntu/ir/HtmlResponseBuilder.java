@@ -7,7 +7,7 @@ public class HtmlResponseBuilder {
 	public static String buildSingleDocumentPage(List<String[]> documents)
 	{
 		StringBuilder htmlBuilder = new StringBuilder();
-		htmlBuilder.append("<html>").append("<head>Stack Overflow</head>");
+		htmlBuilder.append("<html>");
 		boolean questionCreated = Boolean.FALSE;
 		
 		for(String[] docDetail : documents)
@@ -21,7 +21,7 @@ public class HtmlResponseBuilder {
 				questionCreated = Boolean.TRUE;
 				continue;
 			}
-			htmlBuilder.append("<p>").append(title).append("<p>").append(body).append("</p>").append("</p>");
+			htmlBuilder.append("<p>").append(title).append("<p>").append(body).append("</p>").append("</p><hr/>");
 		}
 		htmlBuilder.append("</html>");
 		return htmlBuilder.toString();

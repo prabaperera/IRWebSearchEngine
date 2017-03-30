@@ -33,6 +33,8 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
@@ -60,7 +62,7 @@ public class TestLucene
 		try(IndexWriter w = new IndexWriter(index, config);)
 		{
 			Iterator<String> rdKeyIterator = rowRelationMap.keySet().iterator();
-			
+			int docs = 0;
 			while(rdKeyIterator.hasNext())
 			{
 				String key = rdKeyIterator.next();
@@ -68,6 +70,7 @@ public class TestLucene
 				
 				List<RowDetail> rowDetails = extractRowDetail(rdList);
 				docIndexer.addCompoundDocToIndex(w, rowDetails);
+				System.out.println(docs++);
 			}
 		}
 		
@@ -89,7 +92,7 @@ public class TestLucene
 		//try(IndexWriter w = new IndexWriter(index, config); Stream<Path> files = Files.list(Paths.get("./resource/documents"));)
 		try(IndexWriter w = new IndexWriter(index, config);)
 		{
-			
+			int row = 0;
 			try(Stream<Path> files = Files.list(Paths.get(ConfigLoader.getConfig(ConfigLoader.DOC_LOCATION)));)
 			{
 				Iterator<Path> pi = files.iterator();
@@ -101,13 +104,14 @@ public class TestLucene
 					{
 						while(sc.hasNextLine())
 						{
+							System.out.println(row++);
 							String  xml = sc.nextLine();
 							try
 							{
 								RowData rd =  DoumentUtil.extractRowData(xml);
 								addIndividualDocToIndex(w ,xml , rd.id , rd.parentId);
 							}
-							catch(XPathExpressionException| ParserConfigurationException| SAXException e)
+							catch(Throwable e)
 							{
 								System.out.println(xml);
 								e.printStackTrace();
@@ -202,7 +206,7 @@ public class TestLucene
 	            String title = d.get("title");
 	            String documentId = d.get("root");
 	            String titleUrl = HtmlResponseBuilder.getDoumentAccessURL(documentId , title);
-	            resultDocIds.add(new SearchResult(documentId, titleUrl , i, doc.score));
+	            resultDocIds.add(new SearchResult(documentId, titleUrl , i+1, doc.score));
 	            System.out.println((i + 1) + ". " + documentId +" "+title);
 	        }
 	        System.out.println("-----------------------------------------\n");
@@ -213,56 +217,56 @@ public class TestLucene
 		return resultDocIds;
 	}
 	
-//	public static List<SearchResult> excecuteQuery(String searchQuery , int hitsPerPage , String searchIn) throws IOException, ParseException
-//	{
-//		String [] searchInArray = searchIn.split(",");
-//		JavaCodeAnalyzer analyzer = new JavaCodeAnalyzer();
-//		FSDirectory index = FSDirectory.open(Paths.get(ConfigLoader.getConfig(ConfigLoader.INDEX_LOCATION_OF_MERGED_DOCUMENT)));
-//		
-//		// 2. query
-//        String querystr = searchQuery;
-//
-//        // the "title" arg specifies the default field to use
-//        // when no field is explicitly specified in the query.
-//        
-//        MultiFieldQueryParser  queryParser = new MultiFieldQueryParser(
-//        		searchInArray,
-//                analyzer);
-//        Query q = queryParser.parse(querystr);
-//        
-//        // 3. search
-//        
-//        List<SearchResult> resultDocIds = new ArrayList<SearchResult>(hitsPerPage);
-//        
-//        try(IndexReader reader = DirectoryReader.open(index);)
-//        {
-//	        IndexSearcher searcher = new IndexSearcher(reader);
-//	        
-//	        TopDocs docs = searcher.search(q, hitsPerPage);
-//	        ScoreDoc[] hits = docs.scoreDocs;
-//	
-//	        // 4. display results
-//	        System.out.println("Found " + hits.length + " hits.");
-//	        for(int i=0;i<hits.length;++i) {
-//	        	ScoreDoc doc = hits[i];
-//	            int docId = doc.doc;
-//	            Document d = searcher.doc(docId);
-//	            String title = d.get("title");
-//	            String documentId = d.get("root");
-//	            String titleUrl = HtmlResponseBuilder.getDoumentAccessURL(documentId , title);
-//	            resultDocIds.add(new SearchResult(documentId, titleUrl , i, doc.score));
-//	            System.out.println((i + 1) + ". " + documentId +" "+title);
-//	        }
-//	        System.out.println("-----------------------------------------\n");
-//	        // reader can only be closed when there
-//	        // is no need to access the documents any more.
-//        }
-//		
-//		return resultDocIds;
-//	}
-	
+	/**
+	 * Advance search
+	 * @param hitsPerPage
+	 * @param queryMap
+	 * @return
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	public static List<SearchResult> excecuteQuery(int hitsPerPage , Map<String, String> queryMap) 
+			throws IOException, ParseException{
+		String[] searchInArray = new String[queryMap.keySet().size()];
+		
+		int cnt = 0;
+		for(String key : queryMap.keySet()){
+			searchInArray[cnt++] = key;
+		}
+		
+		JavaCodeAnalyzer analyzer = new JavaCodeAnalyzer();
+		FSDirectory index = FSDirectory.open(Paths.get(ConfigLoader.
+				getConfig(ConfigLoader.INDEX_LOCATION_OF_MERGED_DOCUMENT)));
+		
+		BooleanQuery.Builder bQueryBuilder = new BooleanQuery.Builder();
+        for(String searchIn : searchInArray){
+            //create the term query object
+            Query q = MultiFieldQueryParser.parse(
+            		queryMap.get(searchIn) , new String[]{searchIn} ,new Occur[]{Occur.MUST}, analyzer);
+            bQueryBuilder.add(q , Occur.MUST);
+        }
+        List<SearchResult> resultDocIds = new ArrayList<SearchResult>(hitsPerPage);
+        
+        try(IndexReader reader = DirectoryReader.open(index);){
+	        IndexSearcher searcher = new IndexSearcher(reader);
+	        
+	        TopDocs docs = searcher.search(bQueryBuilder.build(), hitsPerPage);
+	        ScoreDoc[] hits = docs.scoreDocs;
+	        for(int i=0;i<hits.length;++i) {
+	        	ScoreDoc doc = hits[i];
+	            int docId = doc.doc;
+	            Document d = searcher.doc(docId);
+	            String title = d.get("title");
+	            String documentId = d.get("root");
+	            String titleUrl = HtmlResponseBuilder.getDoumentAccessURL(documentId , title);
+	            resultDocIds.add(new SearchResult(documentId, titleUrl , i+1, doc.score));
+	        }
+        }
+		return resultDocIds;
+	}
 
-	private static List<RowDetail> extractRowDetail(LinkedList<RelationDetail> rdList) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException 
+	private static List<RowDetail> extractRowDetail(LinkedList<RelationDetail> rdList) 
+			throws XPathExpressionException, ParserConfigurationException, SAXException, IOException 
 	{
 		Iterator<RelationDetail> rIterator = rdList.iterator();
 		List<RowDetail> rowdetailList = new ArrayList<TestLucene.RowDetail>(rdList.size());
@@ -287,7 +291,10 @@ public class TestLucene
 
 	private static Map<String, LinkedList<RelationDetail>> buildRelationMap() throws XPathExpressionException,
 			ParserConfigurationException, SAXException, IOException {
-		
+		/**
+		 * This map maintain Question and its answers for the Question
+		 * RelationDetail - contains row number inside the file and the details of the subfile which record contains
+		 */
 		Map<String, LinkedList<RelationDetail>> rowRelationMap = new TreeMap<String, LinkedList<RelationDetail>>();
 		
 		try(Stream<Path> files = Files.list(Paths.get(ConfigLoader.getConfig(ConfigLoader.DOC_LOCATION)));)
@@ -376,4 +383,5 @@ public class TestLucene
 			this.body = body;
 		}
 	}
+
 }

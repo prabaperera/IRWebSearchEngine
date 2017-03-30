@@ -10,6 +10,7 @@ public class ConfigLoader {
 	public static final String INDEX_LOCATION_OF_MERGED_DOCUMENT = "INDEX_LOCATION_OF_MERGED_DOCUMENT";
 	public static final String INDEX_LOCATION_OF_INDIVIDUAL_DOCUMENT = "INDEX_LOCATION_OF_INDIVIDUAL_DOCUMENT";
 	public static final String ORIGINAL_DOC_LOCATION = "ORIGINAL_DOC_LOCATION";
+	public static final String STOP_WORD_LIST = "STOP_WORD_LIST";
 	
 	private static final Properties prop = new Properties();
 	

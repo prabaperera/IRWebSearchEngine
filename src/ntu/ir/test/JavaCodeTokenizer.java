@@ -11,8 +11,6 @@ public class JavaCodeTokenizer extends CharTokenizer {
 	  
 	private static final String pattern = "[ |.|(|)|{|}|,|<|>]";
 
-    // Create a Pattern object
-    
 	  /**
 	   * Construct a new LetterTokenizer.
 	   */
@@ -50,16 +48,6 @@ public class JavaCodeTokenizer extends CharTokenizer {
 	    
 	  }
 	  
-//	  
-//	  public static void main(String[] args) {
-//		  String line = "thisis(";
-//	      // Create a Pattern object
-//	      Pattern r = Pattern.compile(pattern);
-//
-//	      // Now create matcher object.
-//	      Matcher m = r.matcher(line);
-//	      System.out.println( m.find( ));
-//	}
 	}
 
 

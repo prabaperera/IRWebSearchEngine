@@ -5,7 +5,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Insert title here</title>
+<title>solution</title>
 <script language="JavaScript" type="text/javascript" src="jquery.min.js"></script>
 <script language="JavaScript" type="text/javascript" src="jquery.js"></script>
 	<script language="JavaScript" type="text/javascript" src="jquery-ui.js"></script>

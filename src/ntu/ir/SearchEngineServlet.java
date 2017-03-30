@@ -1,15 +1,20 @@
 package ntu.ir;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
 
@@ -55,6 +60,34 @@ public class SearchEngineServlet extends HttpServlet{
 				throw new ServletException(e);
 			 }
 		}
+		if("advSearch".equals(requestType))
+		{
+			String resultsPerPage = request.getParameter("resultsPerPage");
+			String titleQuery = request.getParameter("titleQuery");
+			String bodyQuery = request.getParameter("bodyQuery");
+			
+			int resPerPage = Integer.parseInt(resultsPerPage);
+			response.setContentType("application/json");
+			 try 
+			 {
+				 Map<String, String> queryMap = new HashMap<String, String>(2);
+				 if(titleQuery != null && !titleQuery.isEmpty())
+				 {
+					 queryMap.put("title", titleQuery);
+				 }
+				 if(bodyQuery != null && !bodyQuery.isEmpty())
+				 {
+					 queryMap.put("body", bodyQuery);
+				 }
+				 
+				 List<SearchResult> resultDocs = TestLucene.excecuteQuery( resPerPage, queryMap);
+				
+				response.getWriter().println((new Gson()).toJson(resultDocs));
+	
+			 }catch (ParseException e) {
+				throw new ServletException(e);
+			 }
+		}
 		else if("document".equals(requestType))
 		{
 			response.setContentType("text/html");
@@ -82,5 +115,10 @@ public class SearchEngineServlet extends HttpServlet{
 				throw new ServletException(e);
 			}
 		}
+	}
+	
+	public static void main(String[] args) throws XPathExpressionException, IOException, ParserConfigurationException, SAXException {
+		//TestLucene.buildIndex();
+		TestLucene.buildDocumentIndex();
 	}
 }
