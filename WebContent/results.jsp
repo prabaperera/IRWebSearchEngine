@@ -83,7 +83,42 @@ $('#searchButton').click(function () {
 		});
 });
 
-
+$('#tagSearchButton').click(function () {
+	
+	$.ajax({
+		url : 'IRApplicationServlet',
+		data : {
+			requestType : 'expertUserSearch',
+			tagName : $('#tagName').val()
+		},
+		success : function(json) 
+		{
+			buildUserResultBody(json);
+		},
+		error: function(){
+			alert("Error occured");
+		},
+		dataType: 'json'
+		});
+});
+$('#tagRelevanceButton').click(function () {
+	
+	$.ajax({
+		url : 'IRApplicationServlet',
+		data : {
+			requestType : 'tagRelevanceSearch',
+			tagName : $('#relTagName').val()
+		},
+		success : function(json) 
+		{
+			buildTagRelevanceBody(json);
+		},
+		error: function(){
+			alert("Error occured");
+		},
+		dataType: 'json'
+		});
+});
 $('#advSearchButton').click(function () {
 	var titleQueryPara = $("#titleQuery").val();
 	var bodyQueryPara = $("#bodyQuery").val();
@@ -124,6 +159,40 @@ function buildResultBody(json)
 	resultView.innerHTML = html;
 }
 
+function buildUserResultBody(json)
+{
+	var resultView = document.getElementById('resultView');
+	var table = document.createElement('table');
+	var html = '<div>';
+	
+	$.each(json, function(i, user)
+			{
+				if(user != null)
+				{
+					html += ('<div style="margin-bottom: 15px;" class=\'searchResult\' id='+user.userId+'><h3 style="margin:0px;"> User Id: '+ user.userId+'</h3><div> Accepted Answer Count: '+user.acceptedAnswersCount+'</div></div>');
+				}
+			});
+	html += '</div>';
+	resultView.innerHTML = html;
+}
+
+
+function buildTagRelevanceBody(json)
+{
+	var resultView = document.getElementById('resultView');
+	var table = document.createElement('table');
+	var html = '<div>';
+	
+	$.each(json, function(i, question)
+			{
+				if(question != null)
+				{
+					html += ('<div style="margin-bottom: 15px;" class=\'searchResult\' id='+question.docId+'><h3 style="margin:0px;"> Question : '+ question.body+'</h3><div> Tag Frequency: '+question.tagFrequency+'</div></div>');
+				}
+			});
+	html += '</div>';
+	resultView.innerHTML = html;
+}
 $("#accordion").accordion({
     collapsible: true
   });
@@ -143,7 +212,8 @@ $( "#tabs" ).tabs();
   <ul>
     <li><a href="#tabs-1">Basic Search</a></li>
     <li><a href="#tabs-2">Advanced Search</a></li>
-    <li><a href="#tabs-4">Applications</a></li>
+    <li><a href="#tabs-4">Application One</a></li>
+    <li><a href="#tabs-5">Application Two</a></li>
     <li><a href="#tabs-3">Settings</a></li>
   </ul>
   <div id="tabs-1" class="tabDiv" style="background-color:while;background-color: white;padding: 0px">
@@ -186,7 +256,22 @@ $( "#tabs" ).tabs();
   	</table>
   </div>
   <div id="tabs-4" class="tabDiv" style="background-color:while;background-color: white;">
-  	<p><b>Applications</b></p>
+  	<table>
+  		<tr>
+			<td><input type="text" id="tagName" style="width:600px;height:30px;	font-size:20px" placeholder="Tag Name"></td>
+			<td><button type="button" id="tagSearchButton" style="width:80px;height:30px">Search</button></td>
+		</tr>
+		
+	</table>
+  </div>
+  <div id="tabs-5" class="tabDiv" style="background-color:while;background-color: white;">
+  	<table>
+  		<tr>
+			<td><input type="text" id="relTagName" style="width:600px;height:30px;	font-size:20px" placeholder="Tag Name"></td>
+			<td><button type="button" id="tagRelevanceButton" style="width:80px;height:30px">Search</button></td>
+		</tr>
+		
+	</table>
   </div>
   <div id="tabs-3" class="tabDiv" style="background-color:while;background-color: white;">
   	<table><tr><td><label id ="indexBuild"><U>build Index</U></label></td><td><img id="indexProgress" src="images/loading-bar.gif" style="width:100px;height:100px;"></td> </tr></table>
