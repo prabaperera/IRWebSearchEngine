@@ -35,43 +35,30 @@ public class ExpertUserFinder {
 
 		IndexSearcher toSearcher;
 		IndexReader toReader;
+    final String TAG_INDEX_FILE="J:\\MSC\\IR\\data\\TagIndex.txt";
+    final String ANSWER_INDEX_FILE="J:\\MSC\\IR\\data\\AnswerIndex.txt";
 
 		try {
 
-			iReader = DirectoryReader.open(FSDirectory.open(Paths.get("J:\\MSC\\IR\\data\\TagIndex.txt")));
+			iReader = DirectoryReader.open(FSDirectory.open(Paths.get(TAG_INDEX_FILE)));
 			fromSearcher = new IndexSearcher(iReader);
-
-			toReader = DirectoryReader.open(FSDirectory.open(Paths.get("J:\\MSC\\IR\\data\\AnswerIndex.txt")));
+			toReader = DirectoryReader.open(FSDirectory.open(Paths.get(ANSWER_INDEX_FILE)));
 			toSearcher = new IndexSearcher(toReader);
-
 			QueryBuilder builder = new QueryBuilder(new StandardAnalyzer());
 			Query fromQuery = builder.createPhraseQuery("tags", queryStr);
-
 			String fromField = "answerID"; // Name of the from field
-			boolean multipleValuesPerDocument = true; // Set only  true in the
-														// case when your
-														// fromField has
-														// multiple values per
-														// document in your
-														// index
+			boolean multipleValuesPerDocument = true; 
 			String toField = "answerID"; // Name of the to field
 			ScoreMode scoreMode = ScoreMode.Max;// Defines how the scores are
-												// translated into the other
-												// side of the join.
-
-		
 			Query joinQuery = JoinUtil.createJoinQuery(fromField, multipleValuesPerDocument, toField, fromQuery,
-					fromSearcher, scoreMode);
-
-			
+			fromSearcher, scoreMode);
 			GroupingSearch groupingSearch = new GroupingSearch("ownerId");
-
 			Sort sort = new Sort(new SortField("count", SortField.Type.DOC.INT));
 			groupingSearch.setGroupSort(sort);
+			
+			
 			TopGroups<BytesRef> results = groupingSearch.search(toSearcher, joinQuery, 0, 1000);
-
-		
-			GroupDocs<BytesRef>[] groups = results.groups;
+    		GroupDocs<BytesRef>[] groups = results.groups;
 			orderdList = new ArrayList<User>();
 
 			for (GroupDocs<BytesRef> groupDocs : groups) {

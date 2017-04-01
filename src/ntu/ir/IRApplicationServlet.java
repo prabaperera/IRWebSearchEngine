@@ -13,8 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 
 import ntu.ir.app.ExpertUserFinder;
-import ntu.ir.app.RelavantQuestionFinder;
-import ntu.ir.app.model.Question;
+import ntu.ir.app.FrequentWordFinder;
+import ntu.ir.app.model.FrequentTerm;
 import ntu.ir.app.model.User;
 
 /**
@@ -60,15 +60,15 @@ public class IRApplicationServlet extends HttpServlet {
 		{
 			String tagName =  request.getParameter("tagName");
 			
-			RelavantQuestionFinder relavantQuestionFinder=new RelavantQuestionFinder();
+			FrequentWordFinder frequentWordFinder=new FrequentWordFinder();
 			System.out.println("Q :"+tagName);
 			
 			response.setContentType("application/json");
 			 try 
 			 {
 				 
-				 List<Question> questions = relavantQuestionFinder.searchQuestions(tagName);
-				response.getWriter().println((new Gson()).toJson(questions));
+				 List<FrequentTerm> terms = frequentWordFinder.getFrequentWordList(tagName);
+				response.getWriter().println((new Gson()).toJson(terms));
 	
 			 }catch (Exception e) {
 				throw new ServletException(e);
@@ -81,33 +81,9 @@ public class IRApplicationServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		doRequest(request, response);
+		doGet(request, response);
 		//doGet(request, response);
 	}
 
-	protected void doRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-
-		String requestType = request.getParameter("requestType");
-		response.setCharacterEncoding("UTF-8");
-		
-		if("expertUserSearch".equals(requestType))
-		{
-			String tagName =  request.getParameter("tagName");
-			
-			ExpertUserFinder expertUserFinder=new ExpertUserFinder();
-			
-			
-			response.setContentType("application/json");
-			 try 
-			 {
-				 
-				 List<User> userList = expertUserFinder.searchTopUsers(tagName);
-				response.getWriter().println((new Gson()).toJson(userList));
 	
-			 }catch (Exception e) {
-				throw new ServletException(e);
-			 }
-		}
-	}
 }

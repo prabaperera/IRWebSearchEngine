@@ -183,11 +183,11 @@ function buildTagRelevanceBody(json)
 	var table = document.createElement('table');
 	var html = '<div>';
 	
-	$.each(json, function(i, question)
+	$.each(json, function(i, term)
 			{
-				if(question != null)
+				if(term != null)
 				{
-					html += ('<div style="margin-bottom: 15px;" class=\'searchResult\' id='+question.docId+'><h3 style="margin:0px;"> Question : '+ question.body+'</h3><div> Tag Frequency: '+question.tagFrequency+'</div></div>');
+					html += ('<div style="margin-bottom: 15px;" class=\'searchResult\'><h3 style="margin:0px;"> Word : '+ term.term+'</h3> Word Frequency : '+term.frequency+'</div>');
 				}
 			});
 	html += '</div>';
@@ -212,8 +212,8 @@ $( "#tabs" ).tabs();
   <ul>
     <li><a href="#tabs-1">Basic Search</a></li>
     <li><a href="#tabs-2">Advanced Search</a></li>
-    <li><a href="#tabs-4">Application One</a></li>
-    <li><a href="#tabs-5">Application Two</a></li>
+    <li><a href="#tabs-4">Expert Users</a></li>
+    <li><a href="#tabs-5">Frequent Words</a></li>
     <li><a href="#tabs-3">Settings</a></li>
   </ul>
   <div id="tabs-1" class="tabDiv" style="background-color:while;background-color: white;padding: 0px">
