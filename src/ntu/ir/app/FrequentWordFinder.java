@@ -34,6 +34,7 @@ import org.apache.lucene.util.QueryBuilder;
 
 import ntu.ir.app.model.FrequentTerm;
 import ntu.ir.app.util.CustomStopWordAnalizer;
+import ntu.ir.test.ConfigLoader;
 
 public class FrequentWordFinder {
 
@@ -47,10 +48,12 @@ public class FrequentWordFinder {
 		 ScoreDoc[] docarray=null;
 		 try {
 				Analyzer analyzer = new CustomStopWordAnalizer();
+				ConfigLoader configLoader=new ConfigLoader();
+				String docLocation=configLoader.getConfig("DOC_LOCATION");
 
 				
 				System.out.println("Searching");
-				iReader = DirectoryReader.open(FSDirectory.open(Paths.get("J:\\MSC\\IR\\data\\TagBodyIndex.txt")));
+				iReader = DirectoryReader.open(FSDirectory.open(Paths.get(docLocation+"\\TagBodyIndex.txt")));
 				
 				TopScoreDocCollector collector = TopScoreDocCollector.create(MAX_SEARCH_HITS);
 				QueryBuilder builder = new QueryBuilder(analyzer);
@@ -98,8 +101,10 @@ public class FrequentWordFinder {
 		List<FrequentTerm> frequentTermList=new ArrayList<>();
 		try {
 			
-			
-			IndexReader iReader = DirectoryReader.open(FSDirectory.open(Paths.get("J:\\MSC\\IR\\data\\TagBodyIndex.txt")));
+			ConfigLoader configLoader=new ConfigLoader();
+			String docLocation=configLoader.getConfig("DOC_LOCATION");
+
+			IndexReader iReader = DirectoryReader.open(FSDirectory.open(Paths.get(docLocation+"\\TagBodyIndex.txt")));
 				
 			
 			for (ScoreDoc scoreDoc : docs) {

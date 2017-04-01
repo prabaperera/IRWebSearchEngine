@@ -38,7 +38,8 @@
 $(document).ready( function() 
 		{
 	$("#indexProgress").hide();
-	
+	$("#expertUserProgress").hide();
+	$("#frequentWordProgress").hide();
 	$('#indexBuild').click(function () {
 		$("#indexProgress").show();
 		$.ajax({
@@ -52,6 +53,44 @@ $(document).ready( function()
 			},
 			error: function(){
 				$("#indexProgress").hide();
+				alert("Error occured while building Index.");
+			},
+			dataType: 'json'
+			});
+	});
+	
+	$('#expertUserBuild').click(function () {
+		$("#expertUserProgress").show();
+		$.ajax({
+			url : 'IRApplicationServlet',
+			data : {
+				requestType : 'expertUserBuild'
+			},
+			success : function(json) 
+			{
+				$("#expertUserProgress").hide();
+			},
+			error: function(){
+				$("#expertUserProgress").hide();
+				alert("Error occured while building Index.");
+			},
+			dataType: 'json'
+			});
+	});
+	
+	$('#frequentWordBuild').click(function () {
+		$("#frequentWordProgress").show();
+		$.ajax({
+			url : 'IRApplicationServlet',
+			data : {
+				requestType : 'frequentWordBuild'
+			},
+			success : function(json) 
+			{
+				$("#frequentWordProgress").hide();
+			},
+			error: function(){
+				$("#frequentWordProgress").hide();
 				alert("Error occured while building Index.");
 			},
 			dataType: 'json'
@@ -274,7 +313,20 @@ $( "#tabs" ).tabs();
 	</table>
   </div>
   <div id="tabs-3" class="tabDiv" style="background-color:while;background-color: white;">
-  	<table><tr><td><label id ="indexBuild"><U>build Index</U></label></td><td><img id="indexProgress" src="images/loading-bar.gif" style="width:100px;height:100px;"></td> </tr></table>
+  	<table>
+  	<tr>
+  	<td><label id ="indexBuild"><U>build Index</U></label></td>
+  	<td><img id="indexProgress" src="images/loading-bar.gif" style="width:100px;height:100px;"></td> 
+  	</tr>
+  	<tr>
+  	<td><label id ="expertUserBuild"><U>build Expert User Index</U></label></td>
+  	<td><img id="expertUserProgress" src="images/loading-bar.gif" style="width:100px;height:100px;"></td> 
+  	</tr>
+  	<tr>
+  	<td><label id ="frequentWordBuild"><U>build Frequent Word Index</U></label></td>
+  	<td><img id="frequentWordProgress" src="images/loading-bar.gif" style="width:100px;height:100px;"></td> 
+  	</tr>
+  	</table>
   </div>
 </div>
 <hr/>

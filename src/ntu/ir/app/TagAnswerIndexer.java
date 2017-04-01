@@ -33,6 +33,7 @@ import org.apache.lucene.util.Version;
 import org.apache.lucene.util.packed.PackedInts.Reader;
 
 import ntu.ir.app.util.XMLReader;
+import ntu.ir.test.ConfigLoader;
 
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
@@ -52,9 +53,11 @@ public class TagAnswerIndexer {
 	public void indexTagData(List<String[]> attList) throws Exception {
 
 		try {
+			ConfigLoader configLoader=new ConfigLoader();
+			String docLocation=configLoader.getConfig("DOC_LOCATION");
 
 			// specify the directory to store the Lucene index
-			Directory indexDir = FSDirectory.open(Paths.get("J:\\MSC\\IR\\data\\TagIndex.txt"));
+			Directory indexDir = FSDirectory.open(Paths.get(docLocation+"\\TagIndex.txt"));
 
 			// specify the analyzer used in indexing
 			Analyzer analyzer = new StopAnalyzer(StopAnalyzer.ENGLISH_STOP_WORDS_SET);
@@ -99,9 +102,11 @@ public class TagAnswerIndexer {
 	public void indexAnswerData(List<String[]> attList) throws Exception {
 
 		try {
+			ConfigLoader configLoader=new ConfigLoader();
+			String docLocation=configLoader.getConfig("DOC_LOCATION");
 
 			// specify the directory to store the Lucene index
-			Directory indexDir = FSDirectory.open(Paths.get("J:\\MSC\\IR\\data\\AnswerIndex.txt"));
+			Directory indexDir = FSDirectory.open(Paths.get(docLocation+"\\AnswerIndex.txt"));
 
 			// specify the analyzer used in indexing
 			Analyzer analyzer = new StandardAnalyzer();
@@ -164,6 +169,40 @@ public class TagAnswerIndexer {
 			e.printStackTrace();
 		}
 
+	}
+	public void buildIndex(){
+		try {
+			ConfigLoader configLoader=new ConfigLoader();
+			String docLocation=configLoader.getConfig("DOC_LOCATION");
+          System.out.println(docLocation);
+			File folder =new File(docLocation+"//doc");
+           
+            for (File xmlFile : folder.listFiles()) {
+				
+			
+			XMLReader xmlReader = new XMLReader();
+			List<String[]> tagList = xmlReader.readTagData(xmlFile.getPath());
+
+			TagAnswerIndexer indexer = new TagAnswerIndexer();
+
+			indexer.indexTagData(tagList);
+
+			
+			List<String[]> answerList = xmlReader.readAnswerData(xmlFile.getPath());
+
+			indexer.indexAnswerData(answerList);
+
+			
+            }
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		
+		
 	}
 
 }

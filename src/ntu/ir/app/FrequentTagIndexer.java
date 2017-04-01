@@ -28,6 +28,7 @@ import org.apache.lucene.util.Version;
 
 import ntu.ir.app.util.CustomStopWordAnalizer;
 import ntu.ir.app.util.XMLReader;
+import ntu.ir.test.ConfigLoader;
 
 public class FrequentTagIndexer {
 
@@ -36,16 +37,18 @@ public class FrequentTagIndexer {
 	public void indexBody(List<String[]> attList) throws Exception {
 
 		try {
+			ConfigLoader configLoader=new ConfigLoader();
+			String docLocation=configLoader.getConfig("DOC_LOCATION");
+
 
 			// specify the directory to store the Lucene index
-			Directory indexDir = FSDirectory.open(Paths.get("J:\\MSC\\IR\\data\\TagBodyIndex.txt"));
+			Directory indexDir = FSDirectory.open(Paths.get(docLocation+"\\TagBodyIndex.txt"));
 
 			// specify the analyzer used in indexing
 				Analyzer analyzer = new CustomStopWordAnalizer();
 
 			IndexWriterConfig cfg = new IndexWriterConfig(analyzer);
 			cfg.setOpenMode(OpenMode.CREATE_OR_APPEND);
-			
 			// create the IndexWriter
 			writer = new IndexWriter(indexDir, cfg);
 
@@ -58,20 +61,15 @@ public class FrequentTagIndexer {
 				String tagList[]=tagWithoutSymbols.split(",");
 				
 				for (String tag : tagList) {
-				if(data[3].contains(">")){
-					System.out.println("tag :"+data[3]);
-				}
-					FieldType fieldType=new FieldType();
-						fieldType.setStoreTermVectors(true);
-						fieldType.setStored(true);
-						fieldType.setTokenized(true);
-						fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
-						Document doc = new Document();
+				
+				FieldType fieldType=new FieldType();
+				fieldType.setStoreTermVectors(true);
+				fieldType.setStored(true);
+				fieldType.setTokenized(true);
+				fieldType.setIndexOptions(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS);
+				Document doc = new Document();
 				doc.add(new TextField("tag",tag, Field.Store.YES));
-				
-				Field bodyField=new Field("body",removeHtml(data[3]), fieldType);
-				
-				
+				Field bodyField=new Field("body",data[3], fieldType);
 				doc.add(bodyField);
 				writer.addDocument(doc);
 				}
@@ -96,10 +94,17 @@ public class FrequentTagIndexer {
 
 	
 	
-	public static void main(String args[]) {
+	
+
+	public void buildIndex(){
+		
+		
 		try {
-             File folder =new File("J:\\MSC\\IR\\data\\src");
-             for (File xmlFile : folder.listFiles()) {
+			ConfigLoader configLoader=new ConfigLoader();
+			String docLocation=configLoader.getConfig("DOC_LOCATION");
+            File folder =new File(docLocation+"//doc");
+           
+            for (File xmlFile : folder.listFiles()) {
 				
 			
 			XMLReader xmlReader = new XMLReader();
@@ -107,21 +112,11 @@ public class FrequentTagIndexer {
 
 			FrequentTagIndexer frequentTagIndexer=new FrequentTagIndexer();
 			frequentTagIndexer.indexBody(tagList);
-             }
+            }
 			
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-
-	}
-
-	private String removeHtml(String s)
-	{
-		try {
-			return s; //s.replace("<p>", "").replace("</p>", "");
-		} catch (Exception e) {
-			return s;
 		}
 		
 		

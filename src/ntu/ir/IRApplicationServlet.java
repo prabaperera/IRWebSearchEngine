@@ -13,7 +13,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 
 import ntu.ir.app.ExpertUserFinder;
+import ntu.ir.app.FrequentTagIndexer;
 import ntu.ir.app.FrequentWordFinder;
+import ntu.ir.app.TagAnswerIndexer;
 import ntu.ir.app.model.FrequentTerm;
 import ntu.ir.app.model.User;
 
@@ -73,8 +75,33 @@ public class IRApplicationServlet extends HttpServlet {
 			 }catch (Exception e) {
 				throw new ServletException(e);
 			 }
+		}	else if("expertUserBuild".equals(requestType))
+		{
+			response.setContentType("application/json");
+			 try 
+			 {
+				 TagAnswerIndexer tagAnswerIndexer=new TagAnswerIndexer();
+				 tagAnswerIndexer.buildIndex();
+			
+			 }catch (Exception e) {
+				throw new ServletException(e);
+			 }
+		}	else if("frequentWordBuild".equals(requestType))
+		{
+			response.setContentType("application/json");
+			 try 
+			 {
+				 FrequentTagIndexer frequentTagIndexer=new FrequentTagIndexer();
+				 frequentTagIndexer.buildIndex();
+				
+			 }catch (Exception e) {
+				throw new ServletException(e);
+			 }
 		}	
-	
+		
+		
+		
+		
 	}
 
 	/**
