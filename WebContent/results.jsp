@@ -40,6 +40,7 @@ $(document).ready( function()
 	$("#indexProgress").hide();
 	$("#expertUserProgress").hide();
 	$("#frequentWordProgress").hide();
+	
 	$('#indexBuild').click(function () {
 		$("#indexProgress").show();
 		$.ajax({

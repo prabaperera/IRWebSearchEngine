@@ -1,6 +1,7 @@
 package ntu.ir;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -82,7 +83,8 @@ public class IRApplicationServlet extends HttpServlet {
 			 {
 				 TagAnswerIndexer tagAnswerIndexer=new TagAnswerIndexer();
 				 tagAnswerIndexer.buildIndex();
-			
+				 response.getWriter().println((new Gson()).toJson(new ArrayList<String>()));
+					
 			 }catch (Exception e) {
 				throw new ServletException(e);
 			 }
@@ -90,10 +92,11 @@ public class IRApplicationServlet extends HttpServlet {
 		{
 			response.setContentType("application/json");
 			 try 
-			 {
+			 {System.out.println("indexing");
 				 FrequentTagIndexer frequentTagIndexer=new FrequentTagIndexer();
 				 frequentTagIndexer.buildIndex();
-				
+				 response.getWriter().println((new Gson()).toJson(new ArrayList<String>()));
+					
 			 }catch (Exception e) {
 				throw new ServletException(e);
 			 }

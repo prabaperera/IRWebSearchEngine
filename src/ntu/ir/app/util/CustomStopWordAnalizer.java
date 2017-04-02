@@ -44,7 +44,7 @@ public class CustomStopWordAnalizer extends Analyzer{
 		stopWordList.add("I'm");
 		stopWordList.add("us");
 		stopWordList.add("my");
-		
+		stopWordList.add("/us");
 		stopwords = new CharArraySet(stopWordList , Boolean.TRUE);
 		stopwords.addAll(StopAnalyzer.ENGLISH_STOP_WORDS_SET);
 		

@@ -103,7 +103,7 @@ public class FrequentTagIndexer {
 			ConfigLoader configLoader=new ConfigLoader();
 			String docLocation=configLoader.getConfig("DOC_LOCATION");
             File folder =new File(docLocation+"//doc");
-           
+           System.out.println(folder.getPath());
             for (File xmlFile : folder.listFiles()) {
 				
 			
