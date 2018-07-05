@@ -16,7 +16,7 @@ public class HtmlResponseBuilder {
 			String body = docDetail[2];
 			if(!questionCreated)
 			{
-				htmlBuilder.append("<h2>").append(title).append("</h2>");
+				htmlBuilder.append("<h3>").append(title).append("</h3>");
 				htmlBuilder.append("<p>").append(body).append("</p>");
 				questionCreated = Boolean.TRUE;
 				continue;
